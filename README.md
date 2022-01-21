@@ -64,6 +64,16 @@ elif NetworkType =='NorthMall':
     LM = IO.loadmat('Amatrix_northmall.mat')
     A = LM['A1']
     G = nx.Graph(A)   
+```
+
+Now we will start destroying the network and estimating the fragility
 
 ```
+if NetworkType == 'NorthMall':
+    i = 0
+    Fragilities = np.zeros(1) #Set the fragilities array
+    Output = run_sparse_fn(G,delta,NetworkType+'Net_FullRemoval'+str(i))#
+    np.savez(NetworkType+'Net_FullRemoval_' +str(i) + '_Edge' + Today+ '.npz',Output)
+    ```
+Yes it is that easy to destroy the network. Some things will print to the screen as a sanity check since for large networks this can take a really long time to run. We are not done however, we have yet to estimate the fragility, fortunately there is code provided for this as well.
 
