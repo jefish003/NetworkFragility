@@ -150,3 +150,4 @@ Note that these steps have been computed with rewiring. However if we wish we ca
     Output2 = run_sparse_worw(G,delta,NetworkType+'Net_WORW_FullRemoval'+str(i))
     np.savez(NetworkType+'Net_WORW_FullRemoval_' +str(i) + '_Edge' + Today+ '.npz',Output2)
 ```
+That is it! The rest of the Examples.py file simply does all of these steps, but for the other types of networks (BA,ER and WS). 
