@@ -74,6 +74,36 @@ if NetworkType == 'NorthMall':
     Fragilities = np.zeros(1) #Set the fragilities array
     Output = run_sparse_fn(G,delta,NetworkType+'Net_FullRemoval'+str(i))#
     np.savez(NetworkType+'Net_FullRemoval_' +str(i) + '_Edge' + Today+ '.npz',Output)
-    ```
+```
+
 Yes it is that easy to destroy the network. Some things will print to the screen as a sanity check since for large networks this can take a really long time to run. We are not done however, we have yet to estimate the fragility, fortunately there is code provided for this as well.
 
+```
+##############################################################
+    ##       Fragility estimation step                          ##
+    ##############################################################
+    FN = fragile_net()
+    
+    #We must check both the minimum degree attack strategy and the edge betweenness
+    #strategy because for different networks and even different values of delta
+    #one is typically better than the other.
+    MDDict = Output['MinDegree']
+    #Grab the final graph after the edges have been removed
+    G2 = nx.Graph(MDDict['Graphs'][-1])
+    
+    #Add the original graph and the final graph to compute fragility
+    FN.add_graph(G)
+    FN.add_graph_new(G2)
+    
+    #Complete the final step of the algorithm (so far we have only done the 
+    #first two steps not the part for adding edges back which do not affect the
+    #LCC) c was defined above based on delta
+    G2 = FN.sparse_iterative_add_back(c)
+    #Fraction of edges which have been removed from G
+    MDFrac = (len(G.edges())-len(G2.edges()))/len(G.edges())
+    FN.compute_Fragility(len(G.nodes()),c,MDFrac)
+    #The estimate for the minimum degree attack strategy
+    MDEstimatedFrag = FN.return_Fragility() 
+```
+
+Now the fragility has been estimated using rewiring and the minimum degree attack method.
