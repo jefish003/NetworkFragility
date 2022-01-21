@@ -106,4 +106,47 @@ Yes it is that easy to destroy the network. Some things will print to the screen
     MDEstimatedFrag = FN.return_Fragility() 
 ```
 
-Now the fragility has been estimated using rewiring and the minimum degree attack method.
+Now the fragility has been estimated using rewiring and the minimum degree attack method. Note that the third step was implemented in the FN.sparse_iterative_add_back method, which completes the algorithm. However as noted in the paper we are not done for estimating fragility, since this attack method only works well for certain networks and certain deltas. The other attack method used in the paper is the edge betweenness attack method and we implement that method with rewiring and the iterative_add_back algorithm. 
+
+```
+  #Reset FN to eliminate graphs
+    FN = fragile_net()
+    
+    EBDict = Output['EdgeBetweenness']
+    #Grab the final graph after the edges have been removed
+    G2 = nx.Graph(EBDict['Graphs'][-1])
+    
+    #Add the original graph and the final graph to compute fragility
+    FN.add_graph(G)
+    FN.add_graph_new(G2)
+    
+    #Complete the final step of the algorithm (so far we have only done the 
+    #first two steps not the part for adding edges back which do not affect the
+    #LCC) c was defined above based on delta
+    G2 = FN.sparse_iterative_add_back(c)
+    #Fraction of edges which have been removed from G
+    EBFrac = (len(G.edges())-len(G2.edges()))/len(G.edges())
+    FN.compute_Fragility(len(G.nodes()),c,EBFrac)
+    #The estimate for the edge betweenness attack strategy
+    EBEstimatedFrag = FN.return_Fragility()
+```
+
+Now we have completed the process for both the minimum degree and edge betweenness attack methods. To get the final estimate of fragility we need to take the maximum between the two (i.e the minimum number of edges which needed to be removed). 
+
+```
+#Now we can get the true estimated fragility
+    Fragility = np.max(np.array([MDEstimatedFrag,EBEstimatedFrag]))
+    Fragilities[i] = Fragility
+    print("This is the estimated fragility: ", Fragility)
+```
+
+Note that these steps have been computed with rewiring. However if we wish we can also figure out which set of edges would be removed without rewiring as is done below.
+
+```
+#NOTE THAT THIS IS HOW FRAGILITY WAS ESTIMATED, HOWEVER ONE COULD LOOK AT
+    #THE SITUATION WITHOUT REWIRING, THIS IS DONE BELOW
+    #If desired this can be compared to the results without rewiring as part
+    #of the process...
+    Output2 = run_sparse_worw(G,delta,NetworkType+'Net_WORW_FullRemoval'+str(i))
+    np.savez(NetworkType+'Net_WORW_FullRemoval_' +str(i) + '_Edge' + Today+ '.npz',Output2)
+```
