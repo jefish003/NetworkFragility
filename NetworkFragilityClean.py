@@ -126,7 +126,7 @@ class fragile_net:
         if AttackStrategy=='EdgeBetweenness':
             if AttackLCC:
                 LCCcomps = self.components_LCC(G)
-                print("This is LCC: ",LCCcomps)
+                #print("This is LCC: ",LCCcomps)
                 S = G.subgraph(LCCcomps)
                 for i in range(numRemovals):
                     print(i)
