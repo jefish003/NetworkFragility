@@ -11,7 +11,7 @@ import scipy.io as IO
 import networkx as nx
 import numpy as np
 from datetime import datetime
-
+import copy as COPY
 
 Today = datetime.today().strftime('%d-%m-%Y')
 
@@ -26,7 +26,7 @@ Today = datetime.today().strftime('%d-%m-%Y')
 FN = fragile_net()
 
 #Number of trials
-NumTrials = 50 #This will be ignored if the network is the mall network...
+NumTrials = 1 #This will be ignored if the network is the mall network...
 
 #Network parameters
 n = 100
@@ -46,7 +46,7 @@ k = 8
 p = 0.25
 
 Types = ['BA', 'ER', 'WS', 'NorthMall']
-NetworkType = Types[3]
+NetworkType = Types[2]
 
 if NetworkType =='BA':
     G = nx.barabasi_albert_graph(n,m)
@@ -85,6 +85,8 @@ if NetworkType == 'NorthMall':
     MDDict = Output['MinDegree']
     #Grab the final graph after the edges have been removed
     G2 = nx.Graph(MDDict['Graphs'][-1])
+    G3 = COPY.deepcopy(G2)
+    
     
     #Add the original graph and the final graph to compute fragility
     FN.add_graph(G)
@@ -97,8 +99,14 @@ if NetworkType == 'NorthMall':
     #Fraction of edges which have been removed from G
     MDFrac = (len(G.edges())-len(G2.edges()))/len(G.edges())
     FN.compute_Fragility(len(G.nodes()),c,MDFrac)
+    
     #The estimate for the minimum degree attack strategy
     MDEstimatedFrag = FN.return_Fragility()
+    
+    #Compute minimum degree without rewiring fragility
+    MDFrac2 = (len(G.edges())-len(G3.edges()))/len(G.edges())
+    FN.compute_Fragility(len(G.nodes()),c,MDFrac2)
+    OthMD = FN.return_Fragility()
     
     #Reset FN to eliminate graphs
     FN = fragile_net()
@@ -106,6 +114,7 @@ if NetworkType == 'NorthMall':
     EBDict = Output['EdgeBetweenness']
     #Grab the final graph after the edges have been removed
     G2 = nx.Graph(EBDict['Graphs'][-1])
+    G4 = COPY.deepcopy(G2)
     
     #Add the original graph and the final graph to compute fragility
     FN.add_graph(G)
@@ -120,6 +129,11 @@ if NetworkType == 'NorthMall':
     FN.compute_Fragility(len(G.nodes()),c,EBFrac)
     #The estimate for the edge betweenness attack strategy
     EBEstimatedFrag = FN.return_Fragility()
+    
+    #Compute edge betweenness without rewiring fragility
+    EBFrac2 = (len(G.edges())-len(G4.edges()))/len(G.edges())
+    FN.compute_Fragility(len(G.nodes()),c,EBFrac2)
+    OthEB = FN.return_Fragility()
     
     #Now we can get the true estimated fragility
     Fragility = np.max(np.array([MDEstimatedFrag,EBEstimatedFrag]))
@@ -172,6 +186,7 @@ else:
         MDDict = Output['MinDegree']
         #Grab the final graph after the edges have been removed
         G2 = nx.Graph(MDDict['Graphs'][-1])
+        G3 = COPY.deepcopy(G2)
         
         #Add the original graph and the final graph to compute fragility
         FN.add_graph(G)
@@ -187,12 +202,18 @@ else:
         #The estimate for the minimum degree attack strategy
         MDEstimatedFrag = FN.return_Fragility()
         
+        #Compute minimum degree without rewiring fragility
+        MDFrac2 = (len(G.edges())-len(G3.edges()))/len(G.edges())
+        FN.compute_Fragility(len(G.nodes()),c,MDFrac2)
+        OthMD = FN.return_Fragility() #Fragility without rewiring
+        
         #Reset FN to eliminate graphs
         FN = fragile_net()
         
         EBDict = Output['EdgeBetweenness']
         #Grab the final graph after the edges have been removed
         G2 = nx.Graph(EBDict['Graphs'][-1])
+        G4 = COPY.deepcopy(G2)
         
         #Add the original graph and the final graph to compute fragility
         FN.add_graph(G)
@@ -207,6 +228,11 @@ else:
         FN.compute_Fragility(len(G.nodes()),c,EBFrac)
         #The estimate for the edge betweenness attack strategy
         EBEstimatedFrag = FN.return_Fragility()
+        
+        #Compute edge betweenness without rewiring fragility
+        EBFrac2 = (len(G.edges())-len(G4.edges()))/len(G.edges())
+        FN.compute_Fragility(len(G.nodes()),c,EBFrac2)
+        OthEB = FN.return_Fragility() #Fragility without rewiring
         
         #Now we can get the true estimated fragility
         Fragility = np.max(np.array([MDEstimatedFrag,EBEstimatedFrag]))
