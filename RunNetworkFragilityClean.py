@@ -57,6 +57,9 @@ def run_sparse_fn(G,Delta,NetworkType=''):
         Glist2.append(nx.adjacency_matrix(Gnew2))
 
         numRemovals = numRemovals+1
+        #Reset Graph to previous one without rewiring...
+        FN.add_graph_new(None)
+        FN.add_graph(nx.Graph(Glist[len(Glist)-1]))
     
     #print("This is removals: ", removals)
     NestedOutput['Removals'] = np.array(removals)
@@ -105,6 +108,9 @@ def run_sparse_fn(G,Delta,NetworkType=''):
         fracs.append(frac)
         Glist2.append(nx.adjacency_matrix(Gnew2))
         numRemovals = numRemovals+1
+        #Reset Graph to previous one without rewiring...
+        FN.add_graph_new(None)
+        FN.add_graph(nx.Graph(Glist[len(Glist)-1]))
         
     NestedOutput2['Removals'] = np.array(removals)
     NestedOutput2['Fractions'] = np.array(fracs)
