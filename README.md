@@ -150,4 +150,46 @@ Note that these steps have been computed with rewiring. However if we wish we ca
     Output2 = run_sparse_worw(G,delta,NetworkType+'Net_WORW_FullRemoval'+str(i))
     np.savez(NetworkType+'Net_WORW_FullRemoval_' +str(i) + '_Edge' + Today+ '.npz',Output2)
 ```
+
+And to run pymetis (note you will have to install pymetis)
+```
+import numpy as np
+import networkx as nx
+#import pygraphviz as pgv
+from NetworkFragility import fragile_net
+from RunNetworkFragility import run_fragile_net
+from datetime import datetime
+import pymetis
+from datetime import datetime
+import sys
+import scipy.io as IO
+
+Today = datetime.today().strftime('%d-%m-%Y')
+if sys.platform == 'win32':
+    Prefix = 'C:/Users/jefis/'
+   
+else:
+    Prefix = '/home/jeremie/'
+    
+
+#Delta = 0.5 ....
+n = 133
+
+FN = fragile_net()
+Complete = FN.frac_comp(n, 66)
+
+MatFile = IO.loadmat(Prefix+'Dropbox/jeremie_erik/jeremie_erik_mahesh/WriteUps/Data/Networks/Amatrix_northmall.mat')
+A = MatFile["A1"]
+G = nx.Graph(A)
+
+
+A_list1 = []
+
+for j in range(len(G)):
+    A_list1.append(np.array(list(G[j])))    
+
+NumEdges,PartLabels = pymetis.part_graph(2,A_list1)
+
+np.savez("DataForPYMETIS_MALLNETWORK_ONLY_0p5_"+ "_date_"+Today+".npz",NumEdges,PartLabels)
+```
 That is it! The rest of the Examples.py file simply does all of these steps, but for the other types of networks (BA,ER and WS). 
