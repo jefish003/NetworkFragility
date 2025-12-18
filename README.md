@@ -135,7 +135,7 @@ Now we have completed the process for both the minimum degree and edge betweenne
 
 ```
 #Now we can get the true estimated fragility
-    Fragility = np.max(np.array([MDEstimatedFrag,EBEstimatedFrag]))
+    Fragility = np.max(np.array([MDEstimatedFrag,EBEstimatedFrag])) #This assumes we are not using pymetis -- pymetis would need to be included in the max if we are using it.
     Fragilities[i] = Fragility
     print("This is the estimated fragility: ", Fragility)
 ```
