@@ -151,7 +151,7 @@ Note that these steps have been computed with rewiring. However if we wish we ca
     np.savez(NetworkType+'Net_WORW_FullRemoval_' +str(i) + '_Edge' + Today+ '.npz',Output2)
 ```
 
-And to run pymetis (note you will have to install pymetis)
+And to run pymetis (note you will have to install pymetis, and can use pip to do so)
 ```
 import numpy as np
 import networkx as nx
@@ -191,5 +191,44 @@ for j in range(len(G)):
 NumEdges,PartLabels = pymetis.part_graph(2,A_list1)
 
 np.savez("DataForPYMETIS_MALLNETWORK_ONLY_0p5_"+ "_date_"+Today+".npz",NumEdges,PartLabels)
+```
+And using Edge Collective Influence (NOTE You must download the Edge Collective Influence code which can be found here: https://github.com/PPNew1/Edge_Collective_Influence/tree/main
+```
+from EdgeCollectiveInfluence import *
+from DualCompetitivePercolation import *
+import matplotlib.pyplot as plt
+from NetworkFragilityClean import fragile_net
+from igraph import Graph
+import networkx as nx
+
+def nx_to_igraph(G_nx):
+    """
+    Convert an undirected NetworkX graph to an igraph Graph.
+    Node IDs are stored in the 'name' attribute.
+    """
+    # Get nodes and edges
+    nodes = list(G_nx.nodes())
+    edges = [(nodes.index(u), nodes.index(v)) for u, v in G_nx.edges()]
+
+    # Create igraph graph
+    G_ig = Graph(n=len(nodes), edges=edges, directed=False)
+    G_ig.vs["name"] = nodes  # preserve original node IDs    G_ig.vs["name"] = nodes  # preserve original node IDs
+    return G_ig
+
+
+G = nx.barabasi_albert_graph(500,4)
+total_edges = 1984
+Diff = len(G.edges())-total_edges
+#remove the extra edges
+for i in range(Diff):
+    Arr = np.array(list(G.edges()))
+    np.random.shuffle(Arr)
+    G.remove_edge(Arr[0,0],Arr[0,1])
+
+g = nx_to_igraph(G)
+res=IECIR(g,p=0.5)
+FN = fragile_net()
+FN.compute_Fragility(500,250,len(res[2][2])/g.ecount())
+print(FN.return_Fragility())
 ```
 That is it! The rest of the Examples.py file simply does all of these steps, but for the other types of networks (BA,ER and WS). 
