@@ -192,7 +192,7 @@ NumEdges,PartLabels = pymetis.part_graph(2,A_list1)
 
 np.savez("DataForPYMETIS_MALLNETWORK_ONLY_0p5_"+ "_date_"+Today+".npz",NumEdges,PartLabels)
 ```
-And using Edge Collective Influence (NOTE You must download the Edge Collective Influence code which can be found here: https://github.com/PPNew1/Edge_Collective_Influence/tree/main
+And using Edge Collective Influence (NOTE You must download the Edge Collective Influence code which can be found here: https://github.com/PPNew1/Edge_Collective_Influence/tree/main)
 ```
 from EdgeCollectiveInfluence import *
 from DualCompetitivePercolation import *
