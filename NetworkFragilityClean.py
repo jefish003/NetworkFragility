@@ -8,6 +8,7 @@ Created on Fri Jan 21 10:16:35 2022
 import numpy as np
 import networkx as nx
 import copy as COPY
+from collections import OrderedDict
 
 
 class fragile_net:
@@ -104,12 +105,40 @@ class fragile_net:
         self.Anew = Anew
     
 
+
+
+    def edge_degree_sum_dict(self,G):
+        """
+        Returns a dictionary where keys are edges (tuples) and values are
+        the sum of degrees of the two nodes connected by that edge.
+        """
+        return {(u, v): G.degree[u] + G.degree[v] for u, v in G.edges()}
+
+
+
+    def edge_degree_sum_sorted(self,G):
+        """
+        Returns an OrderedDict where edges are sorted by the sum of degrees
+        of their nodes, from largest to smallest.
+        """
+        # Compute sum of degrees for each edge
+        edge_degree_sum = self.edge_degree_sum_dict(G)
+    
+        # Sort by values in descending order
+        sorted_edge_degree_sum = OrderedDict(
+            sorted(edge_degree_sum.items(), key=lambda item: item[1], reverse=True)
+            )
+    
+        return sorted_edge_degree_sum
+
+
+    
     def sparse_gg_removal(self,numRemovals,AttackStrategy="EdgeBetweenness",AttackLCC=True):
         """Performs gready removal on a networkx Graph
            -numRemovals - (pos. int.)The number of edges to remove 
             AttackStrategy - (string) The method of attack, currently available options are MinDegree to attack the 
                              minimum degree nodes and EdgeBetweenness to attack 
-                             edges with the largest value of edge betweenness
+                             edges with the largest value of edge betweenness, or EdgeSum to attack the nodes with the greatest sum of degrees across them
             AttackLCC - (Bool) Set to True if the attack should be performed on
                         the largest connected component
             
@@ -147,6 +176,30 @@ class fragile_net:
                     G.remove_edge(*L[0])
                     RemovalList.append(L[0])
             
+        elif AttackStrategy=='EdgeSum':
+            if AttackLCC:
+                LCCcomps = self.components_LCC(G)
+                #print("This is LCC: ",LCCcomps)
+                S = G.subgraph(LCCcomps)
+                SortedEdgeSum = self.edge_degree_sum_sorted(S)
+                for i in range(numRemovals):
+                    print(i)
+                    L = list(SortedEdgeSum.keys())
+                    G.remove_edge(*L[0])
+                    RemovalList.append(L[0])
+                    LCCcomps = self.components_LCC(G)
+                    #print("This is LCC: ",LCCcomps)
+                    S = G.subgraph(LCCcomps)
+                    SortedEdgeSum = self.edge_degree_sum_sorted(S)
+            else:
+                for i in range(numRemovals):
+                    print(i)
+                    SortedEdgeSum = self.edge_degree_sum_sorted(G)
+                    L = list(SortedEdgeSum.keys())
+                    G.remove_edge(*L[0])
+                    RemovalList.append(L[0])
+            
+
             
         elif AttackStrategy=='MinDegree':
             if AttackLCC:
@@ -191,7 +244,7 @@ class fragile_net:
      
                     
         else:
-            raise ValueError('Only EdgeBetweenness and MinDegree Currently Allowed for AttackStrategy')
+            raise ValueError('Only EdgeBetweenness, EdgeSum and MinDegree Currently Allowed for AttackStrategy')
         
         self.Gnew = G
         return G,RemovalList    
@@ -199,8 +252,8 @@ class fragile_net:
     def greedy_global_removal(self,numRemovals,AttackStrategy="EdgeBetweenness",AttackLCC=True):
         """
            numRemovals    - (pos. int.) The number of edges to remove.
-           AttackStrategy - (String) Currently only Edge Betweenness is supported
-                                     Min Degree and Max degree strategies are
+           AttackStrategy - (String) Currently only EdgeBetweenness, EdgeSum is supported
+                                     and MinDegree strategies are
                                      allowed.
            AttackLCC      - (default True) If true then the LCC will always be
                             attacked for the greedy portion of the algorithm,
@@ -237,6 +290,30 @@ class fragile_net:
                     L = L[len(L)-1]
                     G.remove_edge(*L[0])
                     RemovalList.append(L[0])
+        elif AttackStrategy=='EdgeSum':
+            if AttackLCC:
+                LCCcomps = self.components_LCC(G)
+                #print("This is LCC: ",LCCcomps)
+                S = G.subgraph(LCCcomps)
+                SortedEdgeSum = self.edge_degree_sum_sorted(S)
+                for i in range(numRemovals):
+                    print(i)
+                    L = list(SortedEdgeSum.keys())
+                    G.remove_edge(*L[0])
+                    RemovalList.append(L[0])
+                    LCCcomps = self.components_LCC(G)
+                    #print("This is LCC: ",LCCcomps)
+                    S = G.subgraph(LCCcomps)
+                    SortedEdgeSum = self.edge_degree_sum_sorted(S)
+            else:
+                for i in range(numRemovals):
+                    print(i)
+                    SortedEdgeSum = self.edge_degree_sum_sorted(G)
+                    L = list(SortedEdgeSum.keys())
+                    G.remove_edge(*L[0])
+                    RemovalList.append(L[0])
+            
+
             
             
         elif AttackStrategy=='MinDegree':
@@ -281,7 +358,7 @@ class fragile_net:
        
                     
         else:
-            raise ValueError('Only EdgeBetweenness and MinDegree Currently Allowed for AttackStrategy')
+            raise ValueError('Only EdgeBetweenness, EdgeSum and MinDegree Currently Allowed for AttackStrategy')
         Anew = nx.adjacency_matrix(G)
         self.Anew = Anew.todense()
         #print("This is the LCC stuff: ", self.size_LCC(nx.Graph(Anew)))
