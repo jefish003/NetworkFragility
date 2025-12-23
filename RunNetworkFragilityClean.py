@@ -16,6 +16,7 @@ def run_sparse_fn(G,Delta,NetworkType=''):
     Output = {} #There is going to be a lot of output so get ready!
     NestedOutput = {}
     NestedOutput2 = {}
+    NestedOutput3 = {}
     FN = fragile_net()
     FN.add_graph(G)
     
@@ -79,8 +80,9 @@ def run_sparse_fn(G,Delta,NetworkType=''):
     
     #Reset for calculational purposes
     FN.add_graph_new(None)
+    FN.add_graph(CG)
     
-    Message = 'Starting: ' + NetworkType + ' Runs Now!'
+    Message = 'Starting: ' + Method + ' Runs Now!'
     print(Message)
     fracs = []
     removals = []
@@ -120,6 +122,54 @@ def run_sparse_fn(G,Delta,NetworkType=''):
     NestedOutput2['GraphsWORW'] = Glist
     NestedOutput2['Graphs'] = Glist2
     Output[Method] = NestedOutput2
+
+    Method = 'EdgeSum'
+    print('Starting ' + Method + ' Now!')
+    
+    #Reset for calculational purposes
+    FN.add_graph_new(None)
+    FN.add_graph(CG)
+    
+    Message = 'Starting: ' + Method + ' Runs Now!'
+    print(Message)
+    fracs = []
+    removals = []
+    fracwithoutrewire = []
+    min_frac = 1
+    numRemovals = 1
+    Glist = [nx.adjacency_matrix(CG)]
+    Glist2 = [nx.adjacency_matrix(CG)]
+    while min_frac>Delta:
+        print('Number of Removals: ',numRemovals)
+        removals.append(numRemovals)
+        Gnew,RL = FN.sparse_gg_removal(1,Method)
+        AAANew = nx.adjacency_matrix(Gnew)
+        Glist.append(AAANew)
+        #Glist.append(Gnew)
+        Size,frac = FN.size_LCC(Gnew,return_fraction=True)
+        
+        fracwithoutrewire.append(frac)
+        SUM=1
+        while SUM>0:
+            Gnew2 = FN.sparse_rwtf_greedy()
+            SUM = FN.size_LCC(Gnew2)-FN.size_LCC(Gnew)
+        Size,frac = FN.size_LCC(Gnew2,return_fraction=True)
+        min_frac = frac
+        fracs.append(frac)
+        Glist2.append(nx.adjacency_matrix(Gnew2))
+        numRemovals = numRemovals+1
+        #Reset Graph to previous one without rewiring...
+        FN.add_graph_new(None)
+        FN.add_graph(nx.Graph(Glist[len(Glist)-1]))
+        
+    NestedOutput3['Removals'] = np.array(removals)
+    NestedOutput3['Fractions'] = np.array(fracs)
+    NestedOutput3['FinalAdjacency'] = Gnew2
+    NestedOutput3['FinalNumRemoved'] = numRemovals-1
+    NestedOutput3['FractionsWithoutRewire'] = np.array(fracwithoutrewire)
+    NestedOutput3['GraphsWORW'] = Glist
+    NestedOutput3['Graphs'] = Glist2
+    Output[Method] = NestedOutput3
     
     return Output
 
@@ -129,6 +179,7 @@ def run_sparse_worw(G,Delta,NetworkType=''):
     Output = {} #There is going to be a lot of output so get ready!
     NestedOutput = {}
     NestedOutput2 = {}
+    NestedOutput3 = {}
     FN = fragile_net()
     GG = COPY.deepcopy(G)
     FN.add_graph(GG)
@@ -213,6 +264,46 @@ def run_sparse_worw(G,Delta,NetworkType=''):
     NestedOutput2['FractionsWithoutRewire'] = np.array(fracwithoutrewire)
     NestedOutput2['Graphs'] = Glist
     Output[Method] = NestedOutput2
+
+    #################################################################    
+    Method = 'EdgeSum'
+    print('Starting ' + Method + ' Now!')
+    
+    #Reset for calculational purposes
+    
+    FN.add_graph_new(None)
+    
+    Message = 'Starting: ' + NetworkType + ' Runs Now!'
+    print(Message)
+    fracs = []
+    removals = []
+    fracwithoutrewire = []
+    min_frac = 1
+    Glist = [nx.adjacency_matrix(G)]
+    
+    numRemovals = 1
+    while min_frac>Delta:
+        print('Number of Removals: ',numRemovals)
+        removals.append(numRemovals)
+        Gnew,L = FN.sparse_gg_removal(1,AttackStrategy=Method)
+        AAANew = nx.adjacency_matrix(Gnew)
+        Glist.append(AAANew)
+        
+        Size,frac = FN.size_LCC(Gnew,return_fraction=True)
+        print(frac)
+        fracwithoutrewire.append(frac)
+        
+        min_frac =  frac
+        numRemovals = numRemovals+1
+        
+        
+    NestedOutput3['Removals'] = np.array(removals)
+    NestedOutput3['Fractions'] = np.array(fracs)
+    NestedOutput3['FinalAdjacency'] = Gnew
+    NestedOutput3['FinalNumRemoved'] = numRemovals-1
+    NestedOutput3['FractionsWithoutRewire'] = np.array(fracwithoutrewire)
+    NestedOutput3['Graphs'] = Glist
+    Output[Method] = NestedOutput3
     
     return Output
 
