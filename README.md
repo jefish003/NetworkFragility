@@ -1,7 +1,7 @@
 # NetworkFragility
 Code for "How fragile is your network...." By Jeremie Fish, Mahesh Banavar and Erik Bollt
 
-There are two files containing a number of functions meant to make it easy and convenient to estimate the fragility of various networks, including Barabasi-Albert (BA), Erdos-Renyi (ER) and Watts-Strogatz (WS) networks. We will walk through the Examples.py file which is also provided. 
+There are two files containing a number of functions meant to make it easy and convenient to estimate the fragility of various networks, including Barabasi-Albert (BA), Erdos-Renyi (ER) and Watts-Strogatz (WS) networks. We will walk through the Examples.py file which is also provided. Additionally a file that contains an example of how to run all of the methods is uploaded, in this case the example is performed on the Florida ecological network. Below we will work through other examples of how to walk thorugh the code. 
 
 First we will start by importing all of the functions we need to estimate fragility and for saving purposes.
 
